@@ -4,7 +4,7 @@
     <div class="row center-block">
         <div class="box box-widget widget-user" style="width: 920px; margin-left: 15px;">
           <div class="widget-user-header bg-aqua-active text-center" style="height: 80px;">
-            <h3 class="widget-user-username center-text">区块链测试结果查询</h3>
+            <h3 class="widget-user-username center-text">区块链实时数据显示</h3>
           </div>
 
           <div class="box-body"> 
@@ -15,7 +15,7 @@
                   <input type="text"  class="form-control" id="testUrl" v-model="testUrl"/>
                 </div>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                  <label for="testFrq" class="col-sm-3 control-label">请输入查询开始时间</label>
                   <div class="input-group" style="padding-left:14px;">
                     <span class="input-group-addon">
@@ -33,7 +33,7 @@
                     <datepicker :readonly="true" format="yyyy/MM/dd" id="endDateInput" v-model="endTime"></datepicker>
 
                   </div>   
-              </div>
+              </div> -->
             </form>
             <div align="center">
               <button class="btn btn-primary" :disabled="disabled" @click="startSearching">
@@ -72,8 +72,8 @@ export default {
       startTime: new Date(),
       endTime: new Date(),
       buttonText: "查询",
-      barData: [],
-      labels: []  
+      barData: [1,2,3,4,5],
+      labels: [6,7,8,9,10]  
     }
   },
   mounted (){
@@ -131,13 +131,29 @@ export default {
     },
     
     startSearching: function () {
+      var socket = new WebSocket('ws://localhost:8086/');
       var self = this
-      self.buttonText = "正在查询中"
-      self.disabled = "true"
-      // self.visualization = true
-      console.log(this.startTime)
-      console.log(this.startTime.getTime())
-      if (self.startTime.getTime() > self.endTime.getTime()) {
+      socket.onopen = function() {
+          /*socket.send('login:' + 
+             localStorage.getItem('deviceId') +  ':' +
+              localStorage.getItem('userSecret'));*/
+
+          socket.onmessage = function(response) {
+            var data = eval("("+response.data+")")
+            var barData = data.barData
+            var labels = data.labels
+            self.barData = barData
+            console.log(self.barData)
+            self.labels = labels
+            console.log(labels)
+            self.visualization = true
+            self.showChart()
+
+              console.log(data); // upon message
+          }
+
+      }
+      /*if (self.startTime.getTime() > self.endTime.getTime()) {
         alert('请重新选择查询时间')
       } else {
         var options = {
@@ -150,7 +166,6 @@ export default {
           function(response) {
             self.buttonText = "查询"
             self.disabled = false
-            /******to be continued********/
             var data = eval(response.data)
             var barData = data.data
             var labels = data.labels
@@ -164,7 +179,7 @@ export default {
               self.showChart()
             }
           })
-      }
+      }*/
     }
   }
 }
